@@ -71,7 +71,7 @@ def create_flags(data, lags=[1,2,3,5], MA_periods=[5, 20, 100], vol_windows=[10,
     data['Target_Classification'] = (data['Returns'].shift(-1) > 0).astype(int)
     data['Target_Regression'] = data['Returns'].shift(-1)
 
-def create_x_y(data, flags = ['Lagged_Returns_1', 'Lagged_Returns_2', 'Lagged_Returns_3', 'Lagged_Returns_5',
+def create_x_y(data, flags = ['Close', 'Lagged_Returns_1', 'Lagged_Returns_2', 'Lagged_Returns_3', 'Lagged_Returns_5',
               'MA_5', 'MA_20', 'RSI', 'MACD', 'Signal_Line', 'MACD_Hist',
               'Upper_Band', 'Lower_Band', 'Volatility_10', 'Volatility_20']):
     x_unclean = data[flags]
@@ -225,7 +225,8 @@ def maybe_flip_signals(returns, signals):
     
 def backtest_strategy(data, model, x_test, x_test_index, mode="classification", initial_capital=10000):
     
-    y_pred = model.predict(x_test.values)
+    #y_pred = model.predict(x_test.values)
+    y_pred = model.predict(x_test)
     
     if mode == "classification": 
         signals = pd.Series(y_pred, index=x_test_index).shift(1).fillna(0)
@@ -334,7 +335,20 @@ def model_metrics(model,portfolio_class, portfolio_reg, portfolio_combined):
     print("Win Rate - Regression:", win_reg)
     print("Win Rate - Combined:", win_combined)
 
-def run_pipeline(ticker, period="2y", interval="1d", data_path=None, models=["rf","xgb","lm"]):
+def model_metrics_custom(model, portfolio):
+    print(f"Model: {model.name}")
+    
+    sharpe = sharpe_ratio(portfolio)
+    print("Sharpe Ratio:", sharpe)
+    
+    mdd = max_drawdown(portfolio)
+    print("Max Drawdown:", mdd)
+    
+    win = win_rate(portfolio)
+    print("Win Rate:", win)
+
+def run_pipeline(ticker, period="2y", interval="1d", data_path=None, extra_models=None):
+    models = ["rf", "xgb", "lm"]
     
     data_path = data_path or f"../data/{ticker.lower()}.csv"
     
@@ -377,3 +391,19 @@ def run_pipeline(ticker, period="2y", interval="1d", data_path=None, models=["rf
     
     for i in range(len(models)):
         model_metrics(models[i], portfolio_class[i], portfolio_reg[i], portfolio_combined[i])
+    
+    if(extra_models is not None):
+        for model in extra_models:
+            if(model.type == "classification"):
+                model.fit(x_train_class, y_train_class)
+                print_model_stats_classification(model, x_test_class, y_test_class)
+                portfolio = backtest_strategy(data, model, x_test_class, x_test_class_index)
+                model_metrics_custom(model, portfolio)
+            elif(model.type == "regression"):
+                model.fit(x_train_reg, y_train_reg)
+                print_model_stats_regression(model, x_test_reg, y_test_reg)
+                portfolio = backtest_strategy(data, model, x_test_reg, x_test_reg_index, mode="regression")
+                model_metrics_custom(model, portfolio)
+            else:
+                raise ValueError("Model type must be 'classification' or 'regression'")
+            
