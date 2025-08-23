@@ -2,7 +2,7 @@ Stock-ML-Predictor
 
 About
 
-A Python machine learning pipeline for predicting short-term stock price movements and backtesting trading strategies. Supports both classification and regression approaches with multiple models, including Logistic Regression, Linear Regression, Random Forest, and XGBoost.
+A Python machine learning pipeline for predicting short-term stock price movements and backtesting trading strategies. Supports both classification and regression approaches with multiple models, including Logistic Regression, Linear Regression, Random Forest, and XGBoost. It also includes some models I made on my own ranging from simple models to ones using neural networks.
 
 This project is designed as an introduction to quantitative finance and algorithmic trading using machine learning. The main goal is to learn the concepts and techniques behind stock price prediction, backtesting, and strategy evaluation. It is not intended for live trading or financial advice.
 
@@ -10,6 +10,7 @@ It was a way to:
 Understand the workflow of a quantitative trading pipeline.
 Experiment with different ML models for classification and regression.
 Explore backtesting and key metrics like Sharpe ratio and drawdown.
+Use all of those to create my own models and expieriment with neural networks.
 
 Features
 Data Handling: Download historical stock data using Yahoo Finance API or load from local CSV files.
@@ -23,6 +24,7 @@ Results
 Demonstrated on multiple stocks, including Apple, Google and Netflix.
 Metrics tracked: Sharpe ratio, max drawdown, win rate.
 Random Forest generally performs best across both classification and regression approaches.
+My own models outperformed all other pre existing models.
 
 Technologies
 Python
